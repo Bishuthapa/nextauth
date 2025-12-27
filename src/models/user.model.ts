@@ -1,8 +1,7 @@
-
-import { verify } from "crypto";
+import { Iuser } from "@/types";
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
+const userSchema: Iuser = new mongoose.Schema({
     username: {
         type: String,
         required: [true, "Username is required"],
