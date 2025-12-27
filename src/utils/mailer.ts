@@ -6,6 +6,9 @@ interface SendEmailParams {
     userId: string;
 }
 
+
+//using nodemailer
+
 export const sendEmail = async ({ email, emailType, userId }: SendEmailParams) => {
 
     try {
