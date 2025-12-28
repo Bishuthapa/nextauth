@@ -31,7 +31,7 @@ export const sendEmail = async ({
         }
 
         // 4️⃣ Mailtrap config
-        if (!process.env.MAILTRAP_API_KEY) {
+        if (!process.env.MAILTRAP_TOKEN) {
             throw new Error("MAILTRAP_API_KEY not defined");
         }
 
