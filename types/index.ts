@@ -1,4 +1,7 @@
-export interface  Iuser {
+import {type Document} from "mongoose"
+
+
+export interface  Iuser extends Document{
     username : string,
     email: string,
     password: string,
@@ -8,4 +11,10 @@ export interface  Iuser {
     forgetPasswordTokenExpiry: Date,
     verifyToken: string,
     verifyTokenExpiry: Date,
+}
+
+export interface SendEmailParams {
+  email: string;
+  emailType: "verify" | "reset";
+  userId: string;
 }
