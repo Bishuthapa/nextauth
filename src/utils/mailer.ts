@@ -60,7 +60,7 @@ export const sendEmail = async ({
                     ? "Verify your email"
                     : "Reset your password",
             html: `
-        <p>Click the link below to ${emailType === "verify" ? "verify your email" : "reset your password"
+            <p>Click the link below to ${emailType === "verify" ? "verify your email" : "reset your password"
                 }:</p>
         <a href="${link}">${link}</a>
         <p>This link expires in 1 hour.</p>
