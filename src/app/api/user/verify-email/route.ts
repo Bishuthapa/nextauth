@@ -15,12 +15,6 @@ export async function POST(req: NextRequest) {
 
         if (!token) {
             throw new ApiError(400, "token not found");
-            return NextResponse.json({
-                error: "token not found", 
-            },
-                {
-                    status: 400
-                })
         }
 
         const user = await User.findOne({verifyToken: token,
