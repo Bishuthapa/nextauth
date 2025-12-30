@@ -19,14 +19,17 @@ export const sendEmail = async ({
 
         // 3️⃣ Save token in DB
         if (emailType === "verify") {
-            await User.findByIdAndUpdate(userId, {
+            await User.findByIdAndUpdate(userId, { $set: {
                 verifyToken: hashedToken,
                 verifyTokenExpiry: Date.now() + 3600000,
+            }
             });
         } else {
-            await User.findByIdAndUpdate(userId, {
+            await User.findByIdAndUpdate(userId, { $set :{
                 forgetPasswordToken: hashedToken,
                 forgetPasswordTokenExpiry: Date.now() + 3600000,
+            }
+            
             });
         }
 
@@ -48,8 +51,8 @@ export const sendEmail = async ({
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
         const link =
             emailType === "verify"
-                ? `${baseUrl}/verifyemail?token=${rawToken}`
-                : `${baseUrl}/reset-password?token=${rawToken}`;
+                ? `${baseUrl}/verifyemail?token=${hashedToken}`
+                : `${baseUrl}/reset-password?token=${hashedToken}`;
 
         // 6️⃣ Send email
         const info = await transport.sendMail({
