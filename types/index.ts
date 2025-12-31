@@ -18,3 +18,10 @@ export interface SendEmailParams {
   emailType: "verify" | "reset";
   userId: string;
 }
+
+export interface SingupUser {
+  username: string,
+  email : string,
+  password: string,
+  confirmPassword: string
+}
