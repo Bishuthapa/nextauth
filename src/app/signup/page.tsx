@@ -9,6 +9,11 @@ export default function Signup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [buttonDisable, setButtonDisable] = useState(true);
+    const [loading, setLoading] = useState(false);
+
+
+  
 
 
     const submitHandler = (e: { preventDefault: () => void; }) => {
@@ -22,6 +27,13 @@ export default function Signup() {
         formData.append("username", username);
         formData.append("email", email);
         formData.append("password", password);
+    }
+
+    try{
+        
+
+    }catch(e){
+        console.log(e);
     }
 
         return (
