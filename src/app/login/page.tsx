@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,8 +27,15 @@ export default function LoginPage() {
       }
       console.log(response);
 
+      toast.success("Login successful 🎉", {
+        duration: 3000,
+        style: {
+          background: "#16a34a",
+          color: "#fff",
+        },
+      });
+
       router.push("/profile");
-      alert("Login successful");
     } catch (error) {
       console.error("Login error:", error);
     }
