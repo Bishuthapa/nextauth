@@ -63,12 +63,6 @@ export async function POST(req : NextRequest){
         )
 
         return response;
-
-        
-
-
-
-
     }
     catch(error: unknown){
         return NextResponse.json({
