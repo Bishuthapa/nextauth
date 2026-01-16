@@ -19,13 +19,16 @@ export default function LoginPage() {
     try {
       const response = await fetch("/api/user/login", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({email: data.email, password: data.password})
       });
 
       if (!response.ok) {
-          throw new Error("Login failed");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Login failed");
       }
-      console.log(response);
 
       toast.success("Login successful 🎉", {
         duration: 3000,
@@ -36,8 +39,15 @@ export default function LoginPage() {
       });
 
       router.push("/profile");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
+      toast.error(error?.message || "Login failed. Please try again.", {
+        duration: 3000,
+        style: {
+          background: "#dc2626",
+          color: "#fff",
+        },
+      });
     }
   }
 
