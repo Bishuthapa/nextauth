@@ -12,6 +12,7 @@ export default function SignupPage() {
     username: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -21,8 +22,9 @@ export default function SignupPage() {
   };
 
   const handleSignup = async (e: React.FormEvent) => {
+    
     e.preventDefault();
-
+    const {username, password, email} = form;
     // Zod validation
     const result = signupSchema.safeParse(form);
     if (!result.success) {
@@ -36,7 +38,7 @@ export default function SignupPage() {
       const res = await fetch("/api/users/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ username, email, password}),
       });
 
       const data = await res.json();
@@ -88,6 +90,15 @@ export default function SignupPage() {
           type="password"
           placeholder="Password"
           value={form.password}
+          onChange={handleChange}
+          className="w-full rounded border px-3 py-2"
+        />
+
+        <input 
+          name= "confirmPassword"
+          type="password"
+          placeholder="confirm password"
+          value={form.confirmPassword}
           onChange={handleChange}
           className="w-full rounded border px-3 py-2"
         />
