@@ -1,63 +1,103 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { signupSchema } from "@/src/validators/signupSchema";
 
 export default function SignupPage() {
   const router = useRouter();
- async function submitHandler(e: React.FormEvent<HTMLFormElement>) {
+
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
+    // Zod validation
+    const result = signupSchema.safeParse(form);
+    if (!result.success) {
+      toast.error(result.error.issues[0].message);
+      return;
+    }
 
-    const data = {
-      username: formData.get("username"),
-      email: formData.get("email"),
-      password: formData.get("password"),
-    };
-    
+    setLoading(true);
 
     try {
-      const response = await fetch("/api/user/signup", {
+      const res = await fetch("/api/users/signup", {
         method: "POST",
-        body: JSON.stringify({username: data.username, email: data.email, password: data.password})
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
 
-      if (!response.json()) {
-          throw new Error("Signup failed");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error);
       }
+
+      toast.success("Account created! Check your email");
+
+      // redirect after success
+      setTimeout(() => {
         router.push("/login");
-    } catch (error) {
-      console.error("Signup error:", error);
+      }, 1500);
+    } catch (err: any) {
+      toast.error(err.message || "Signup failed");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold">Signup Page</h1>
+    <div className="flex min-h-screen items-center justify-center">
+      <form
+        onSubmit={handleSignup}
+        className="w-full max-w-md space-y-4 rounded-xl border p-6 shadow"
+      >
+        <h1 className="text-2xl font-bold text-center">Create Account</h1>
 
-      <form onSubmit={submitHandler}>
         <input
-          type="text"
           name="username"
           placeholder="Username"
-          required
+          value={form.username}
+          onChange={handleChange}
+          className="w-full rounded border px-3 py-2"
         />
 
         <input
-          type="email"
           name="email"
+          type="email"
           placeholder="Email"
-          required
+          value={form.email}
+          onChange={handleChange}
+          className="w-full rounded border px-3 py-2"
         />
 
         <input
-          type="password"
           name="password"
+          type="password"
           placeholder="Password"
-          required
+          value={form.password}
+          onChange={handleChange}
+          className="w-full rounded border px-3 py-2"
         />
 
-        <button type="submit">Sign Up</button>
+        <button
+          disabled={loading}
+          className="w-full rounded bg-black py-2 text-white disabled:opacity-60"
+        >
+          {loading ? "Creating..." : "Sign Up"}
+        </button>
       </form>
     </div>
   );
