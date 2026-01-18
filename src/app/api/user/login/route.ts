@@ -66,6 +66,10 @@ export async function POST(req : NextRequest){
             email: user.email
         }
 
+         if (!process.env.TOKEN_SECRET) {
+      throw new Error("TOKEN_SECRET not configured");
+    }
+
         
 
         const token = jwt.sign(tokenData, process.env.TOKEN_SECRET!, {expiresIn: '1d' }) //add ! to the tokenSecret to ensure the value is available from .evn
@@ -75,11 +79,19 @@ export async function POST(req : NextRequest){
 
         const response =  NextResponse.json({
             message : "User logged in successfully",
-            success: true
-        })
+            success: true,
+            data : { username: user.username}
+        },
+    {
+        status: 200
+    })
 
         response.cookies.set("token", token,{
-            httpOnly: true
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 60 * 60 * 24,
+            path: "/",
         }
         )
 
@@ -93,6 +105,6 @@ export async function POST(req : NextRequest){
             },
     {
         status: 500
-    })
+    });
     }
 }
