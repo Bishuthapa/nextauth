@@ -18,10 +18,11 @@ export async function POST(req: NextRequest) {
 
         const result = signupSchema.safeParse(reqBody);
 
-        if(!result.success){
+        if (!result.success) {
             return NextResponse.json(
                 {
                     success: false,
+                    message: "Invalid input",
                     errors: result.error.flatten().fieldErrors,
                 },
                 {
@@ -37,15 +38,18 @@ export async function POST(req: NextRequest) {
         console.log(reqBody);
 
 
-        const user = await User.findOne({ email })
+        const existingUser = await User.findOne({
+            $or: [{ email }, { username }]
+        })
 
-        if (user) {
+        if (existingUser) {
             return NextResponse.json({
-                error: "User already exists."
+                success: false,
+                message: existingUser.email === email ? "Email is already registered" : "Username already taken"
             },
                 {
-                    status: 400
-                })
+                    status: 409
+                });
         }
 
 
@@ -66,25 +70,38 @@ export async function POST(req: NextRequest) {
         //send veriication email
 
 
-        await sendEmail({
-            email,
-            emailType: "verify",
-            userId: saveUser._id
-        })
+        try {
+            await sendEmail({
+                email,
+                emailType: "verify",
+                userId: saveUser._id
+            })
+        } catch (emailError) {
+            console.error("Email sending failed:", emailError)
+            
+        }
 
         return NextResponse.json({
-            message: "User created successfully",
+            message: "Account created! Please check your email to verify.",
             success: true,
-            saveUser
-        })
+            data: {
+                username: saveUser.username,
+                email: saveUser.email
+            }
+        },
+            {
+                status: 201
+            })
 
 
 
     }
     catch (error) {
+        console.log("Signup error", error);
         return NextResponse.json(
             {
-                error: error
+                success: false,
+                message: "An error occured during registration"
             },
             {
                 status: 500
