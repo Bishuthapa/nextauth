@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { loginSchema } from "@/src/validators/loginSchema";
-import { loginRateLimit, emailLoginRateLimit } from "@/src/utils/rasr teLimit";
+import { loginRateLimit, emailLoginRateLimit } from "@/src/utils/rateLimit";
 import { getIpAddress } from "@/src/utils/getRateLimitIdentifier";
 
 connect();
