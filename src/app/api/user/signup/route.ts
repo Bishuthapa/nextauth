@@ -4,6 +4,8 @@ import bcryptjs from "bcryptjs";
 import { sendEmail } from "@/src/utils/mailer";
 import { NextRequest, NextResponse } from "next/server";
 import { signupSchema } from "@/src/validators/signupSchema";
+import { signupRateLimit } from "@/src/utils/rateLimit";
+import { getIpAddress } from "@/src/utils/getRateLimitIdentifier";
 
 connect();
 
@@ -11,6 +13,29 @@ connect();
 export async function POST(req: NextRequest) {
 
     try {
+
+        const ip = getIpAddress(req);
+
+        const { success, limit, remaining, reset } = await signupRateLimit.limit(ip);
+        if (!success) {
+            const resetTime = new Date(reset);
+            const waitMinutes = Math.ceil((reset - Date.now()) / 60000);
+
+            return NextResponse.json({
+                success: false,
+                message: `Too many sighup attempts. Please try again in ${waitMinutes} minute(s).`,
+                retryAfter: Math.floor((reset - Date.now()) / 1000),
+            },
+                {
+                    status: 429,
+                    headers: {
+                        "X-RateLimit-Limit": limit.toString(),
+                        "X-RateLimit-Remaining": remaining.toString(),
+                        "X-RateLimit-Reset": resetTime.toISOString(),
+                        "Retry-After": Math.floor((reset - Date.now()) / 1000).toString(),
+                    }
+                })
+        }
 
         const reqBody = await req.json();
 
@@ -65,7 +90,6 @@ export async function POST(req: NextRequest) {
         })
 
         const saveUser = await newUser.save();
-        console.log(saveUser);
 
         //send veriication email
 
@@ -78,7 +102,7 @@ export async function POST(req: NextRequest) {
             })
         } catch (emailError) {
             console.error("Email sending failed:", emailError)
-            
+
         }
 
         return NextResponse.json({
