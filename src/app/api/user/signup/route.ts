@@ -3,6 +3,7 @@ import User from "@/src/models/user.model";
 import bcryptjs from "bcryptjs";
 import { sendEmail } from "@/src/utils/mailer";
 import { NextRequest, NextResponse } from "next/server";
+import { signupSchema } from "@/src/validators/signupSchema";
 
 connect();
 
@@ -13,7 +14,25 @@ export async function POST(req: NextRequest) {
 
         const reqBody = await req.json();
 
-        const { username, email, password } = reqBody;
+        //zod validation
+
+        const result = signupSchema.safeParse(reqBody);
+
+        if(!result.success){
+            return NextResponse.json(
+                {
+                    success: false,
+                    errors: result.error.flatten().fieldErrors,
+                },
+                {
+                    status: 400
+                }
+            );
+        }
+
+
+
+        const { username, email, password } = result.data;
 
         console.log(reqBody);
 
