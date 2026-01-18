@@ -1,9 +1,9 @@
 import {connect} from "@/src/dbConfig/dbConfig";
 import User from "@/src/models/user.model";
-import { ApiError } from "next/dist/server/api-utils";
 import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { loginSchema } from "@/src/validators/loginSchema";
 
 connect();
 /**
@@ -15,28 +15,49 @@ connect();
 
 
 export async function POST(req : NextRequest){
-    try{
+  try {
+    const body = await req.json();
 
-        const reqBody = await req.json();
+    //  Zod validation
+    const result = loginSchema.safeParse(body);
 
-        const { email, password} = reqBody;
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          errors: result.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
 
-        console.log(reqBody);
+    const { email, password } = result.data;
 
+    // ✅ 2. Find user
+    const user = await User.findOne({ email });
 
-        const user = await User.findOne({email});
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid email or password",
+        },
+        { status: 401 }
+      );
+    }
 
+    // ✅ 3. Compare password
+    const validPassword = await bcryptjs.compare(password, user.password);
 
-        if(!user){
-            throw new ApiError(404, "User does not exit");
-        }
-        
-
-        const validPassword = await bcryptjs.compare(password, user.password);
-
-        if(!validPassword){
-            throw new ApiError(404, "Check your credientials");
-        }
+    if (!validPassword) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid email or password",
+        },
+        { status: 401 }
+      );
+    }
 
 
         const tokenData = {
@@ -65,9 +86,11 @@ export async function POST(req : NextRequest){
         return response;
     }
     catch(error: unknown){
+        console.error("Login error", error);
         return NextResponse.json({
-            error : error as string
-        },
+            success : false,
+            message: "An error occure during login"
+            },
     {
         status: 500
     })
