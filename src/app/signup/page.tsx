@@ -53,8 +53,8 @@ export default function SignupPage() {
       setTimeout(() => {
         router.push("/login");
       }, 1500);
-    } catch (err: any) {
-      toast.error(err.message || "Signup failed");
+    } catch (err) {
+      if(err instanceof Error) toast.error(err.message || "Signup failed");
     } finally {
       setLoading(false);
     }
